@@ -1,0 +1,190 @@
+# flyctl launch added from .gitignore
+**/.pyc
+**/__pycache__
+**/logs
+**/data_archive
+**/archive
+**/anon
+
+**/.pytest_cache
+**/.coverage
+**/coverage.xml
+**/pytest-report.html
+
+**/cache
+**/data/*
+
+**/.DS_Store
+
+# snyk
+**/.dccache
+**/*.gql
+**/.env
+
+# Local .terraform directories
+**/**/.terraform/*
+
+# .tfstate files
+**/*.tfstate
+**/*.tfstate.*
+
+# Crash log files
+**/crash.log
+**/crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other secrets. These should not be part of version 
+# control as they are data points which are potentially sensitive and subject 
+# to change depending on the environment.
+**/*.tfvars
+**/*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+**/.terraformrc
+**/terraform.rc
+
+# flyctl launch added from .pytest_cache/.gitignore
+# Created by pytest automatically.
+.pytest_cache/**/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/.gitignore
+# Local .terraform directories
+terraform/.terraform/modules/lambda_function_container_image/**/**/.terraform/*
+
+# Terraform lockfile
+terraform/.terraform/modules/lambda_function_container_image/**/.terraform.lock.hcl
+
+# .tfstate files
+terraform/.terraform/modules/lambda_function_container_image/**/*.tfstate
+terraform/.terraform/modules/lambda_function_container_image/**/*.tfstate.*
+terraform/.terraform/modules/lambda_function_container_image/**/*.tfplan
+
+# Crash log files
+terraform/.terraform/modules/lambda_function_container_image/**/crash.log
+
+# Exclude all .tfvars files, which are likely to contain sentitive data, such as
+# password, private keys, and other secrets. These should not be part of version
+# control as they are data points which are potentially sensitive and subject
+# to change depending on the environment.
+terraform/.terraform/modules/lambda_function_container_image/**/*.tfvars
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+terraform/.terraform/modules/lambda_function_container_image/**/override.tf
+terraform/.terraform/modules/lambda_function_container_image/**/override.tf.json
+terraform/.terraform/modules/lambda_function_container_image/**/*_override.tf
+terraform/.terraform/modules/lambda_function_container_image/**/*_override.tf.json
+
+# Ignore CLI configuration files
+terraform/.terraform/modules/lambda_function_container_image/**/.terraformrc
+terraform/.terraform/modules/lambda_function_container_image/**/terraform.rc
+
+# Lambda directories
+terraform/.terraform/modules/lambda_function_container_image/**/builds
+terraform/.terraform/modules/lambda_function_container_image/**/__pycache__
+
+# Test directories
+terraform/.terraform/modules/lambda_function_container_image/**/.tox
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/alias/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/alias/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/async/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/async/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/build-package/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/build-package/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/complete/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/complete/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/deploy/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/deploy/**/builds/*
+terraform/.terraform/modules/lambda_function_container_image/examples/deploy/**/deploy_script_*.txt
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/multiple-regions/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/multiple-regions/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/simple/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/simple/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_container_image/examples/triggers/.gitignore
+terraform/.terraform/modules/lambda_function_container_image/examples/triggers/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/.gitignore
+# Local .terraform directories
+terraform/.terraform/modules/lambda_function_from_container_image/**/**/.terraform/*
+
+# Terraform lockfile
+terraform/.terraform/modules/lambda_function_from_container_image/**/.terraform.lock.hcl
+
+# .tfstate files
+terraform/.terraform/modules/lambda_function_from_container_image/**/*.tfstate
+terraform/.terraform/modules/lambda_function_from_container_image/**/*.tfstate.*
+terraform/.terraform/modules/lambda_function_from_container_image/**/*.tfplan
+
+# Crash log files
+terraform/.terraform/modules/lambda_function_from_container_image/**/crash.log
+
+# Exclude all .tfvars files, which are likely to contain sentitive data, such as
+# password, private keys, and other secrets. These should not be part of version
+# control as they are data points which are potentially sensitive and subject
+# to change depending on the environment.
+terraform/.terraform/modules/lambda_function_from_container_image/**/*.tfvars
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+terraform/.terraform/modules/lambda_function_from_container_image/**/override.tf
+terraform/.terraform/modules/lambda_function_from_container_image/**/override.tf.json
+terraform/.terraform/modules/lambda_function_from_container_image/**/*_override.tf
+terraform/.terraform/modules/lambda_function_from_container_image/**/*_override.tf.json
+
+# Ignore CLI configuration files
+terraform/.terraform/modules/lambda_function_from_container_image/**/.terraformrc
+terraform/.terraform/modules/lambda_function_from_container_image/**/terraform.rc
+
+# Lambda directories
+terraform/.terraform/modules/lambda_function_from_container_image/**/builds
+terraform/.terraform/modules/lambda_function_from_container_image/**/__pycache__
+
+# Test directories
+terraform/.terraform/modules/lambda_function_from_container_image/**/.tox
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/alias/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/alias/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/async/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/async/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/build-package/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/build-package/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/complete/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/complete/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/deploy/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/deploy/**/builds/*
+terraform/.terraform/modules/lambda_function_from_container_image/examples/deploy/**/deploy_script_*.txt
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/multiple-regions/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/multiple-regions/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/simple/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/simple/**/builds/*
+
+# flyctl launch added from terraform/.terraform/modules/lambda_function_from_container_image/examples/triggers/.gitignore
+terraform/.terraform/modules/lambda_function_from_container_image/examples/triggers/**/builds/*
+fly.toml

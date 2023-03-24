@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+httpx = "*"
+pydantic = "*"
+pytest = "*"
+confection = "*"
+pytest-httpx = "*"
+aiometer = "*"
+pytest-asyncio = "*"
+pymongo = "*"
+python-dotenv = "*"
+bs4 = "*"
+spacy = "*"
+fastapi = "*"
+uvicorn = "*"
+scikit-learn = "*"
+
+[dev-packages]
+ipykernel = "*"
+autopep8 = "*"
+build = "*"
+mongomock = "*"
+
+[requires]
+python_version = "3.9"
