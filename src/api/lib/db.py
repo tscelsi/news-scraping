@@ -7,6 +7,15 @@ from pymongo.collection import Collection
 from bson import ObjectId
 from models import Feed
 
+
+def is_valid_id(id: str):
+    try:
+        ObjectId(id)
+        return True
+    except Exception:
+        return False
+
+
 class MockDeleteResult:
     deleted_count = 1
 
@@ -75,3 +84,7 @@ class Db:
     @property
     def scrapingjob(self) -> Collection:
         return client.news.ScrapingJob
+    
+    @property
+    def user(self) -> Collection:
+        return client.news.User

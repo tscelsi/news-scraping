@@ -2,20 +2,8 @@ from bson import ObjectId
 from pymongo.results import DeleteResult
 from pymongo import ReturnDocument
 from models import Article, DBArticle
-from ..lib.db import Db
-
-class RepositoryException(Exception):
-    message: str
-    def __init__(self, message: str):
-        self.message = message
-
-
-def is_valid_id(id: str):
-    try:
-        ObjectId(id)
-        return True
-    except Exception:
-        return False
+from ..lib.db import Db, is_valid_id
+from ..lib.exceptions import RepositoryInvalidIdError, RepositoryException
 
 _db = Db()
 
@@ -32,7 +20,7 @@ class ArticleRepository:
     @staticmethod
     def read(id: str) -> DBArticle:
         if not is_valid_id(id):
-            raise RepositoryException('Invalid id')
+            raise RepositoryInvalidIdError('Invalid id')
         result = _db.articles.find_one({'_id': ObjectId(id)})
         if not result:
             raise RepositoryException('Not found')
@@ -46,7 +34,7 @@ class ArticleRepository:
     @staticmethod
     def update(id: str, article: Article) -> DBArticle:
         if not is_valid_id(id):
-            raise RepositoryException('Invalid id')
+            raise RepositoryInvalidIdError('Invalid id')
         result = _db.articles.find_one_and_update(
             {'_id': ObjectId(id)}, {'$set': article.dict()},
             return_document=ReturnDocument.AFTER,
@@ -58,7 +46,7 @@ class ArticleRepository:
     @staticmethod
     def delete(id: str) -> DeleteResult:
         if not is_valid_id(id):
-            raise RepositoryException('Invalid id')
+            raise RepositoryInvalidIdError('Invalid id')
         result = _db.articles.delete_one({'_id': ObjectId(id)})
         if not result.deleted_count:
             raise RepositoryException('Not found')

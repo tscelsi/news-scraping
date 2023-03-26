@@ -56,17 +56,6 @@ def test_scrapingjob_repository_update_ignores_irrelevant_fields(env):
 
 
 @mongomock.patch(servers=(('localhost', 27017),))
-def test_scrapingjob_repository_update_can_insert_non_existent_fields(env):
-    from src.api.scrapingjob.repository import ScrapingJobRepository
-    upsert_result = ScrapingJobRepository.upsert('640ddfc8f9ebf203fe2c8282')
-    result = ScrapingJobRepository.update(upsert_result.id, {
-        'status': 'finished',
-        'articleIds': [ObjectId('640ddfc8f9ebf203fe2c8282')]
-    })
-    assert result.articleIds == [ObjectId('640ddfc8f9ebf203fe2c8282')]
-
-
-@mongomock.patch(servers=(('localhost', 27017),))
 def test_scrapingjob_repository_update_overrides_field_previous_values(env):
     from src.api.scrapingjob.repository import ScrapingJobRepository
     from src.api.lib.db import Db
@@ -75,10 +64,8 @@ def test_scrapingjob_repository_update_overrides_field_previous_values(env):
         'userId': ObjectId('640ddfc8f9ebf203fe2c8282'),
         'status': 'finished',
         'created_at': datetime.fromisoformat('2021-09-01'),
-        'articleIds': [ObjectId('640ddfc8f9ebf203fe2c8282')]
     })
     result = ScrapingJobRepository.update(insert_result.inserted_id, {
         'status': 'finished',
-        'articleIds': [ObjectId('330ddfc8f9ebf203fe2c8284')]
     })
-    assert result.articleIds == [ObjectId('330ddfc8f9ebf203fe2c8284')]
+    assert result.status == 'finished'

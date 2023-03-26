@@ -1,26 +1,10 @@
 from bson import ObjectId
 from datetime import datetime
 from pydantic import ValidationError
-from pymongo.results import DeleteResult
 from pymongo import ReturnDocument
 from models.scrapingjob import ScrapingJobStatus, DBScrapingJob, UpdateScrapingJob
-from ..lib.db import Db
-
-
-class RepositoryException(Exception):
-    message: str
-
-    def __init__(self, message: str):
-        self.message = message
-
-
-def is_valid_id(id: str):
-    try:
-        ObjectId(id)
-        return True
-    except Exception:
-        return False
-
+from ..lib.db import Db, is_valid_id
+from ..lib.exceptions import RepositoryException, RepositoryInvalidIdError
 
 _db = Db()
 
@@ -48,7 +32,7 @@ class ScrapingJobRepository:
             DBScrapingJob: The newly created or updated scraping job
         """
         if not is_valid_id(user_id):
-            raise RepositoryException('Invalid id')
+            raise RepositoryInvalidIdError('Invalid id')
         result = _db.scrapingjob.find_one_and_update(
             {'userId': ObjectId(user_id)}, {
                 '$set': {
@@ -65,7 +49,7 @@ class ScrapingJobRepository:
     @staticmethod
     def update(id: str, update_obj: dict):
         if not is_valid_id(id):
-            raise RepositoryException('Invalid id')
+            raise RepositoryInvalidIdError('Invalid id')
         try:
             validated_dict = UpdateScrapingJob(**update_obj).dict()
         except ValidationError as e:
@@ -77,7 +61,7 @@ class ScrapingJobRepository:
     @staticmethod
     def read(id: str) -> DBScrapingJob:
         if not is_valid_id(id):
-            raise RepositoryException('Invalid id')
+            raise RepositoryInvalidIdError('Invalid id')
         result = _db.feedoutlet.find_one({'_id': ObjectId(id)})
         if not result:
             raise RepositoryException('Not found')
