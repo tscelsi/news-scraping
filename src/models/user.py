@@ -24,9 +24,6 @@ class UpdateUser(CustomBaseModel):
 
 
 class DBUser(UpdateUser):
-    class Config:
-        json_encoders = {ObjectId: str}
-
     id: PyObjectId = Field(
         description="Unique identifier of a user in the database",
         alias="_id"

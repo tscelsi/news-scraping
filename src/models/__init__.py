@@ -5,6 +5,7 @@ from .nine_entertainment import NineEntArticle
 from .feed import Feed, DBFeed
 from .feedoutlet import FeedOutlet, DBFeedOutlet
 from .outlet import Outlet, DBOutlet, OutletConfig
+from .source import DBSource
 
 __all__ = [
     'CustomBaseModel'
@@ -19,4 +20,5 @@ __all__ = [
     'Outlet',
     'DBOutlet',
     'OutletConfig',
+    'DBSource'
 ]

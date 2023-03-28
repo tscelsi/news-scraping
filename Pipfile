@@ -18,6 +18,7 @@ spacy = "*"
 fastapi = "*"
 uvicorn = "*"
 scikit-learn = "*"
+fastapi-cache2 = {extras = ["memcache"], version = "*"}
 
 [dev-packages]
 ipykernel = "*"

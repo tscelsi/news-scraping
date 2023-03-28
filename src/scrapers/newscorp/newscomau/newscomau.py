@@ -7,6 +7,7 @@ import httpx
 
 from consts import HEADERS
 from models import Article
+from exceptions import BaseException
 
 
 logger = logging.getLogger(__name__)

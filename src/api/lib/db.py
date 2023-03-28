@@ -88,3 +88,7 @@ class Db:
     @property
     def user(self) -> Collection:
         return client.news.User
+    
+    @property
+    def source(self) -> Collection:
+        return client.news.Outlet
