@@ -17,8 +17,9 @@ ARTICLE_BASE_HREF = 'https://www.theguardian.com/'
 
 ## yes i know the guardian has an API, idc ##
 
-async def list_articles(client: httpx.AsyncClient, path: str) -> list[str]:
-    res = await client.get(ARTICLE_BASE_HREF + path, headers=HEADERS)
+async def list_articles(path: str) -> list[str]:
+    async with httpx.AsyncClient() as client:
+        res = await client.get(ARTICLE_BASE_HREF + path, headers=HEADERS)
     if res.status_code != 200:
         logger.error(f'list_articles;{res.status_code};{res.text}')
         raise BaseException(f'Failed to get {path} with status code {res.status_code}')
@@ -27,8 +28,9 @@ async def list_articles(client: httpx.AsyncClient, path: str) -> list[str]:
     return article_urls
 
 
-async def get_article(client: httpx.AsyncClient, url: str, path: str) -> Article:
-    response = await client.get(url, headers=HEADERS)
+async def get_article(url: str, path: str) -> Article:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=HEADERS)
     if response.status_code != 200:
         logger.error(f'get_article;failed to get {url} with status code {response.status_code};{response.text}')
         return None

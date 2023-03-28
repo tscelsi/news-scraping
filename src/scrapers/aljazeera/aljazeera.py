@@ -15,8 +15,9 @@ OUTLET = 'aljazeera'
 ARTICLE_BASE_HREF = 'https://www.aljazeera.com/'
 
 
-async def list_articles(client: httpx.AsyncClient, path: str) -> list[str]:
-    res = await client.get(ARTICLE_BASE_HREF + path.lstrip('/'), headers=HEADERS, follow_redirects=True)
+async def list_articles(path: str) -> list[str]:
+    async with httpx.AsyncClient() as client:
+        res = await client.get(ARTICLE_BASE_HREF + path.lstrip('/'), headers=HEADERS, follow_redirects=True)
     if res.status_code != 200:
         logger.error(f'list_articles;{res.status_code};{res.text}')
         raise BaseException(
@@ -27,9 +28,10 @@ async def list_articles(client: httpx.AsyncClient, path: str) -> list[str]:
     return article_urls
 
 
-async def get_article(client: httpx.AsyncClient, url: str, path: str) -> Article:
+async def get_article(url: str, path: str) -> Article:
     query = 'graphql?wp-site=aje&operationName=ArchipelagoSingleArticleQuery&variables={"name":"%s","postType":"post","preview":""}' % url
-    response = await client.get(ARTICLE_BASE_HREF + query, headers={**HEADERS, 'wp-site': 'aje'})
+    async with httpx.AsyncClient() as client:
+        response = await client.get(ARTICLE_BASE_HREF + query, headers={**HEADERS, 'wp-site': 'aje'})
     data = response.json()['data']
     if 'errors' in data or data['article'] is None:
         logger.error(

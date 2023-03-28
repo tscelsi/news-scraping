@@ -65,24 +65,23 @@ class Engine:
             httpx.AsyncClient, str], Awaitable[Article]] = _module.get_article
 
     async def run(self) -> Awaitable[list[Article]]:
-        async with httpx.AsyncClient() as client:
-            logger.info(f'{self._name};getting article urls...')
-            # this may raise, we want it to. We can't continue without it.
-            article_urls = await self._list_articles(client, self.prefix)
-            logger.info(
-                f'{self._name};got {len(article_urls)} article urls. Beginning article text retrieval...')
-            logger.debug(f'{self._name};{article_urls}')
-            jobs = [functools.partial(self._get_article, client, url, self.prefix)
-                    for url in article_urls]
-            articles = await aiometer.run_all(
-                jobs,
-                max_at_once=self.max_at_once,
-                max_per_second=self.max_per_second,
-            )
-            articles = [x for x in filter(lambda x: x is not None, articles)]
-            logger.info(
-                f'{self._name};found text for {len(articles)} articles. Updating in db...')
-            logger.debug(f'{self._name};{articles}')
+        logger.info(f'{self._name};getting article urls...')
+        # this may raise, we want it to. We can't continue without it.
+        article_urls = await self._list_articles(self.prefix)
+        logger.info(
+            f'{self._name};got {len(article_urls)} article urls. Beginning article text retrieval...')
+        logger.debug(f'{self._name};{article_urls}')
+        jobs = [functools.partial(self._get_article, url, self.prefix)
+                for url in article_urls]
+        articles = await aiometer.run_all(
+            jobs,
+            max_at_once=self.max_at_once,
+            max_per_second=self.max_per_second,
+        )
+        articles = [x for x in filter(lambda x: x is not None, articles)]
+        logger.info(
+            f'{self._name};found text for {len(articles)} articles. Updating in db...')
+        logger.debug(f'{self._name};{articles}')
         if not self._db.empty:
             db_ops = [
                 UpdateOne(

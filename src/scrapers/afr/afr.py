@@ -17,8 +17,9 @@ OUTLET = 'afr'
 ARTICLE_BASE_HREF = 'https://www.afr.com/'
 
 
-async def list_articles(client: httpx.AsyncClient, path: str) -> list[str]:
-    res = await client.get(ARTICLE_BASE_HREF + path, headers=HEADERS)
+async def list_articles(path: str) -> list[str]:
+    async with httpx.AsyncClient() as client:
+        res = await client.get(ARTICLE_BASE_HREF + path, headers=HEADERS)
     if res.status_code != 200:
         logger.error(f'list_articles;{res.status_code};{res.text}')
         raise BaseException(f'Failed to get {path} with status code {res.status_code}')
@@ -27,10 +28,11 @@ async def list_articles(client: httpx.AsyncClient, path: str) -> list[str]:
     return article_ids
 
 
-async def get_article(client: httpx.AsyncClient, url: str, path: str) -> Article:
+async def get_article(url: str, path: str) -> Article:
     """In this case, the url is actually an article id which we pass to the API."""
     api_url = "https://api.afr.com/api/content/v0/assets/" + url
-    response = await client.get(api_url, headers=HEADERS)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(api_url, headers=HEADERS)
     try:
         article = NineEntArticle(**response.json(), url=url)
         tags = []

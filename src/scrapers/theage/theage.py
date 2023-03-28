@@ -19,20 +19,22 @@ OUTLET = 'theage'
 ARTICLE_BASE_HREF = 'https://www.theage.com.au/'
 
 
-async def list_articles(client: httpx.AsyncClient, path: str | list[str]) -> list[str]:
+async def list_articles(path: str | list[str]) -> list[str]:
     """Because the pagination relies on synchronous requests, we simply add the delay between
     using our Requestor context.
     """
-    res = await client.get(ARTICLE_BASE_HREF + path.lstrip('/'), headers=HEADERS)
+    async with httpx.AsyncClient() as client:
+        res = await client.get(ARTICLE_BASE_HREF + path.lstrip('/'), headers=HEADERS)
     soup = BeautifulSoup(res.text, 'html.parser')
     content_div = soup.find('div', {'class': '_1-N-m'})
     article_urls = [x.a['href'] for x in content_div.findAll('h3')]
     return article_urls
 
 
-async def get_article(client: httpx.AsyncClient, url: str, path: str) -> Article:
+async def get_article(url: str, path: str) -> Article:
     full_url = ARTICLE_BASE_HREF + url.lstrip('/')
-    response = await client.get(full_url, headers=HEADERS)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(full_url, headers=HEADERS)
     if response.status_code != 200:
         logger.error(f'get_article;failed to get {url} with status code {response.status_code};{response.text}')
         return None
