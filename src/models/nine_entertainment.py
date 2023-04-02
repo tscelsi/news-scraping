@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Union, Optional
 
 
 class NineEntArticleHeadlines(BaseModel):
@@ -9,7 +10,7 @@ class NineEntArticleAsset(BaseModel):
     about: str
     body: str
     headlines: NineEntArticleHeadlines
-    wordCount: int
+    wordCount: Optional[int]
 
 
 class NineEntArticleDates(BaseModel):
@@ -26,9 +27,18 @@ class NineEntArticleSource(BaseModel):
     name: str
 
 
+class NineEntAuthor(BaseModel):
+    name: str
+
+
+class NineEntParticipants(BaseModel):
+    authors: list[NineEntAuthor]
+
+
 class NineEntArticle(BaseModel):
     assetType: str = Field()
     asset: NineEntArticleAsset
+    participants: Union[NineEntParticipants, dict]
     categories: list[str]
     dates: NineEntArticleDates
     id: str

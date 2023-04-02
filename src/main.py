@@ -14,6 +14,7 @@ from consts import ROOT_DIR
 from models import Article
 import engine
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

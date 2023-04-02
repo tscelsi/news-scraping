@@ -35,6 +35,9 @@ async def get_article(url: str, path: str) -> Article:
         response = await client.get(api_url, headers=HEADERS)
     try:
         article = NineEntArticle(**response.json(), url=url)
+        if article.assetType != 'article':
+            logger.warning(f'get_article;{url} is not an article;{article.assetType}')
+            return None
         tags = []
         for el in article.tags.values():
             if isinstance(el, list):
@@ -56,6 +59,7 @@ async def get_article(url: str, path: str) -> Article:
             tags=normalised_tags,
             prefix=path,
             scrape_time=datetime.utcnow(),
+            author=[x.name for x in article.participants.authors] if article.participants != {} else [],
         )
     except ValidationError as e:
         logger.error(f'get_article;{e};{url}')
