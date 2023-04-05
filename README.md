@@ -10,6 +10,7 @@
     - [Configuration](#configuration)
     - [Running](#running)
   - [Writing your own scraper](#writing-your-own-scraper)
+  - [API](#api)
 
 
 The [pileof.news](https://news-frontend-kappa.vercel.app/) scraping engine can be used to scrape news articles from different sources.
@@ -117,3 +118,13 @@ You need to add a folder to the `src/scrapers` directory with the name of the mo
 
 
 You will also need to add your module name to the `outlet` field in the `Article` model in the `src/models/article.py` file. In order to be able to call your scraper in a configuration file.
+
+## API
+
+The scraping engine exposes a very basic API that can be used to manage scraped articles. The API is built using [FastAPI](https://fastapi.tiangolo.com/). This may not be very useful, but can be run using:
+
+```bash
+pipenv run python src/app.py
+```
+
+You may need to set some environment variables, see [.env.template](.env.template) for more information. You can see the endpoints that are exposed by the API by running the above command to start the API and visiting the `/docs` endpoint (should be [localhost:5000/docs](localhost:5000/docs)).
