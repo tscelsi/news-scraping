@@ -2,8 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, validator
 from typing import Literal, Any
 
-class Article(BaseModel):
-    outlet: Literal[
+ArticleType = Literal[
         'theage',
         'news.com.au',
         'guardian',
@@ -11,7 +10,11 @@ class Article(BaseModel):
         'bbc',
         'aljazeera',
         'nytimes',
-    ] = Field(description="The outlet the article was scraped from")
+        'medium',
+    ]
+
+class Article(BaseModel):
+    outlet: ArticleType = Field(description="The outlet the article was scraped from")
     url: str = Field(description="The URL of the article")
     prefix: str = Field(description='The URL prefix where the article was listed')
     created: str | datetime | None = Field(description="The date the article was created")
@@ -24,6 +27,8 @@ class Article(BaseModel):
     extra: Any | None = Field(description="Any extra data that may be useful")
     author: list[str] = Field(description="The author(s) of the article")
     scrape_time: datetime = Field(description="The time the article was last scraped")
+    member_only: bool | None = Field(description="Whether the article is a member-only article")
+
 
 class DBArticle(Article):
     id: str = Field(

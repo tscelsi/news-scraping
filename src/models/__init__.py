@@ -6,6 +6,7 @@ from .feed import Feed, DBFeed
 from .feedoutlet import FeedOutlet, DBFeedOutlet
 from .outlet import Outlet, DBOutlet, OutletConfig
 from .source import DBSource
+from .medium import MediumArticle
 
 __all__ = [
     'CustomBaseModel'
@@ -20,5 +21,6 @@ __all__ = [
     'Outlet',
     'DBOutlet',
     'OutletConfig',
-    'DBSource'
+    'DBSource',
+    'MediumArticle'
 ]

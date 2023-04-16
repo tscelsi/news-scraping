@@ -30,6 +30,7 @@ The Guardian | guardian | ✅ | v1
 Al Jazeera | aljazeera | ✅ | v1
 The New York Times | nytimes | ✅ | v1
 NPR | npr | ❌ | -
+[medium.com](https://medium.com/) | medium | ✅ | v1
 **Australian News Outlets**
 The Age | theage | ✅ | v1
 News.com.au | newscomau | ✅ | v1

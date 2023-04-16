@@ -11,6 +11,7 @@ import aiometer
 from models import Article
 from db import Db
 import logging
+from engine_v2 import Enginev2
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -34,6 +35,24 @@ def _factory(module: str,
                   db_uri=db_uri,
                   db_must_connect=db_must_connect,
                   debug=debug)
+
+
+@registry.engine.register('engine.v2')
+def _factoryv2(module: str,
+             path: str,
+             max_at_once: int = 10,
+             max_per_second: int = 10,
+             db_uri: str | None = None,
+             db_must_connect: bool = False,
+             debug: bool = False):
+    return Enginev2(module,
+                  path,
+                  max_at_once=max_at_once,
+                  max_per_second=max_per_second,
+                  db_uri=db_uri,
+                  db_must_connect=db_must_connect,
+                  debug=debug)
+
 
 
 class Engine:
