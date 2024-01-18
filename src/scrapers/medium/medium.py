@@ -15,7 +15,9 @@ class Scraper(CoreScraper):
     SOURCE = 'medium'
     BASE_HREF = 'https://medium.com/'
 
-    async def list_articles(self, prefix: str) -> list[URL]:
+    async def list_articles(self, prefix: str) -> list[URL] | None:
+        """ Returns none, because we can populate the self.articles list from this function. No need to 
+        return list of article urls."""
         async with httpx.AsyncClient() as client:
             tag_slug = re.search(r'^/?(tag/(\w+))', prefix)
             if not tag_slug:

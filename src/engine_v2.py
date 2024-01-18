@@ -1,12 +1,7 @@
-import argparse
 import importlib
-from typing import Callable, Awaitable, Any
-import asyncio
+from typing import Awaitable
 import functools
-from confection import registry
-import catalogue
 from pymongo import UpdateOne
-import httpx
 import aiometer
 from models import Article
 from db import Db
