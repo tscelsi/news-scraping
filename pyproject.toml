@@ -1,0 +1,30 @@
+[project]
+authors = [
+  {name = "Tom"},
+]
+description = "description"
+dynamic = ["version", "readme"]
+name = "news-scraping"
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md"}
+version = {file = "VERSION"}
+
+[tool.black]
+
+[tool.isort]
+profile = "black"
+
+[tool.docformatter]
+black = true
+in-place = true
+recursive = true
+style = "google"
+
+[tool.pytest.ini_options]
+addopts = "-vv -n auto --doctest-modules"
+log_file = "logs/pytest.log"
+log_file_level = "DEBUG"
+markers = ["dbmocked: mark a test as using a mocked database"]
+pythonpath = ["src", "test"]
+testpaths = ["test"]
