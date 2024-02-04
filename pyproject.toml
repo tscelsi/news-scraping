@@ -26,5 +26,5 @@ addopts = "-vv -n auto --doctest-modules"
 log_file = "logs/pytest.log"
 log_file_level = "DEBUG"
 markers = ["dbmocked: mark a test as using a mocked database"]
-pythonpath = ["src", "test"]
-testpaths = ["test"]
+pythonpath = ["src", "tests"]
+testpaths = ["tests"]

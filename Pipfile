@@ -20,6 +20,7 @@ uvicorn = "*"
 scikit-learn = "*"
 fastapi-cache2 = {extras = ["memcache"], version = "*"}
 langchain = "*"
+langchain-openai = "*"
 
 [dev-packages]
 ipykernel = "*"
@@ -34,4 +35,4 @@ pre-commit = "*"
 pytest-xdist = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.12"

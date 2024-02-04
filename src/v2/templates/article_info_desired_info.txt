@@ -1,0 +1,3 @@
+Please find {desired_information} from the following html. The html is taken from a news or blog article so you should always find the correct information somewhere in the text.
+{html_chunk}
+{format_instructions}

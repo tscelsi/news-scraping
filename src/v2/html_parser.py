@@ -40,7 +40,7 @@ def _trace_anchor_to_root(anchor: BeautifulSoup) -> list[tuple[str, dict]]:
     return trace
 
 
-def find_tags_from_traces(root: Tag, traces: list[list[str]]) -> list[Tag]:
+def find_anchor_tags_from_traces(root: Tag, traces: list[list[str]]) -> list[Tag]:
     """Finds the tags that match the anchor traces.
 
     Args:

@@ -1,0 +1,6 @@
+When searching for all the links to news articles in this chunk of html
+{html_chunk}
+Other experts in HTML analysis found the following links:
+{article_links}
+If you think this is wrong, please correct it. Be very careful though, if you're not sure don't change anything.
+{format_instructions}

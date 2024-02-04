@@ -1,0 +1,6 @@
+Find all the links to news articles in the following HTML.
+Bear in mind there may be no links to news articles at all.
+Be careful to not include links that don't point to news articles in your response.
+An example, is a link that points to a web page that is not a news article but a list of news articles. It might look like /news/sports which you should never respond with.
+{format_instructions}
+{html_chunk}
