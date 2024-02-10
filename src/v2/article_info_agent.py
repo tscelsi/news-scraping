@@ -144,7 +144,9 @@ class ArticleInfoAgent:
         response = await get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         title_trace = await self.create_title_trace(soup)
+        # TODO: should be an update in db so we don't remove any traces, but add
+        # to the list of traces - if they are finalised. If not, we can override?
         self.article_title_trace_registry.set(
-            get_url_stem(url), {"finalised": False, "trace": title_trace}
+            get_url_stem(url), {"finalised": False, "traces": [title_trace]}
         )
         return title_trace

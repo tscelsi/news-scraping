@@ -70,6 +70,15 @@ def find_text_from_trace(root: Tag, trace: list[str]) -> str:
     return current_tag.get_text()
 
 
+def find_text_from_traces(root: Tag, traces: list[list[str]]):
+    for trace in traces:
+        try:
+            return find_text_from_trace(root, trace)
+        except ValueError:
+            continue
+    raise ValueError("Text not found with any trace.")
+
+
 def find_anchor_tags_from_traces(root: Tag, traces: list[list[str]]) -> list[Tag]:
     """Finds the tags that match the anchor traces.
 

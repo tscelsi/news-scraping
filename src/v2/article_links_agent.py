@@ -152,6 +152,8 @@ class ArticleLinksAgent:
         response = await get(url)
         soup = create_soup_for_article_link_retrieval(response.text)
         traces, article_links = self._create_scraping_traces(soup)
+        # TODO: should be an update in db so we don't remove any traces, but add
+        # to the list of traces - if they are finalised. If not, we can override?
         self.article_link_trace_registry.set(
             url.rstrip("/"),
             {"finalised": False, "traces": traces},

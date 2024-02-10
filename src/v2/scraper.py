@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from exceptions import BaseException
 from v2.client import get
 from v2.client.helpers import get_domain, get_url_stem
-from v2.html_parser import find_anchor_tags_from_traces, find_text_from_trace
+from v2.html_parser import find_anchor_tags_from_traces, find_text_from_traces
 from v2.models.article import Article
 from v2.registry import JsonFileRegistry
 from v2.soup_helpers import create_soup_for_article_link_retrieval
@@ -71,7 +71,7 @@ class Scraper(BaseModel):
                 get_url_stem(url),
                 raise_on_not_found=True,
             )
-            article_title = find_text_from_trace(soup, article_title_trace["trace"])
+            article_title = find_text_from_traces(soup, article_title_trace["traces"])
             return Article(
                 domain=self.domain,
                 url=url,
@@ -81,6 +81,7 @@ class Scraper(BaseModel):
         except Exception as e:
             logger.error(f"Error getting article info for {url}")
             logger.exception(e)
+            # swallow exception so we don't exit the scrape run
             return None
 
     async def get_article_links(self, url: str) -> list[Tag]:
@@ -97,6 +98,15 @@ class Scraper(BaseModel):
         return [self._maybe_add_prefix_to_href(x.attrs["href"]) for x in article_links]
 
     async def run(self, url: str) -> Awaitable[list[Article]]:
+        """Full run of scrape, from article link acquisition to article information
+        retrieval.
+
+        Args:
+            url (str): The URL to initially retrieve article links from.
+
+        Returns:
+            Awaitable[list[Article]]: A list of article information.
+        """
         self._set_domain(url)
         logger.info(f"{self.domain};getting article urls...")
         # this may raise, we want it to. We can't continue without it.
