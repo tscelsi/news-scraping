@@ -35,6 +35,17 @@ INTERESTING_TAGS = [
 AnchorTag = Tag
 
 
+def remove_uninteresting_paths(tag: Tag):
+    """Remove uninteresting paths from the HTML."""
+    children = tag.contents.copy()
+    for child in children:
+        if isinstance(child, Tag):
+            if child.name in UNINTERESTING_TAGS:
+                child.decompose()
+            else:
+                remove_uninteresting_paths(child)
+
+
 def keep_only_interesting_paths(tag: Tag) -> bool:
     """We only retain paths that a) contain interesting tags and b) contain at least one
     <a> tag."""
@@ -56,7 +67,7 @@ def keep_only_interesting_paths(tag: Tag) -> bool:
     return tag.name == "a" or some_child_contains_a_tag
 
 
-def create_soup_with_body_as_root(html_page: str) -> BeautifulSoup:
+def create_soup_for_article_link_retrieval(html_page: str) -> BeautifulSoup:
     """Create a BeautifulSoup object from the HTML page.
 
     Args:
@@ -67,6 +78,14 @@ def create_soup_with_body_as_root(html_page: str) -> BeautifulSoup:
     """
     soup = BeautifulSoup(html_page, "html.parser")
     keep_only_interesting_paths(soup)
+    body = soup.find("body")
+    body_soup = BeautifulSoup(str(body), "html.parser")
+    return body_soup
+
+
+def create_soup(html_page: str) -> BeautifulSoup:
+    soup = BeautifulSoup(html_page, "html.parser")
+    remove_uninteresting_paths(soup)
     body = soup.find("body")
     body_soup = BeautifulSoup(str(body), "html.parser")
     return body_soup

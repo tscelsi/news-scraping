@@ -27,11 +27,11 @@ def theage():
     return soup_
 
 
-def test_trace_anchor_to_root(soup: BeautifulSoup):
-    from v2.html_parser import _trace_anchor_to_root
+def test_trace_tag_to_root(soup: BeautifulSoup):
+    from v2.html_parser import _trace_tag_to_root
 
     tag = soup.find("a")
-    trace = _trace_anchor_to_root(tag)
+    trace = _trace_tag_to_root(tag)
     assert trace == [
         "a",
         "body",

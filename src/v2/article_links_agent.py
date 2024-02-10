@@ -1,8 +1,8 @@
-import os
 from pathlib import Path
 
+from asyncache import cached
 from bs4 import BeautifulSoup, Tag
-from html_parser import get_unique_anchor_traces
+from cachetools import LRUCache
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -12,8 +12,13 @@ from langchain.prompts import (
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
+from v2.client import get
+from v2.html_parser import get_unique_anchor_traces
+from v2.registry import JsonFileRegistry
+from v2.soup_helpers import create_soup_for_article_link_retrieval
+
 MAX_REVISIONS = 3
-TEMPLATE_DIR = Path(os.path.abspath("")).parent / "templates"
+TEMPLATE_DIR = Path(__file__).parent / "templates"
 
 
 class ArticleLinks(BaseModel):
@@ -22,7 +27,7 @@ class ArticleLinks(BaseModel):
     )
 
 
-class ArticleLinkAgent:
+class ArticleLinksAgent:
     """This agent is responsible for finding news article links in a web page.
 
     It finds an initial set and then revises that set if it has doubts.
@@ -31,13 +36,16 @@ class ArticleLinkAgent:
     SYSTEM_MESSAGE = SystemMessagePromptTemplate.from_template_file(
         TEMPLATE_DIR / "html_expert.txt", input_variables=[]
     )
+    article_link_trace_registry: JsonFileRegistry = JsonFileRegistry(
+        "article_link_traces"
+    )
 
     def __init__(self) -> None:
         self.chat = ChatOpenAI(model_name="gpt-3.5-turbo-0125", temperature=0.0)
 
     def _create_initial_prompt(self, html_chunk: str, format_instructions: str):
         initial_instructions_template = HumanMessagePromptTemplate.from_template_file(
-            TEMPLATE_DIR / "find_desired_information.txt",
+            TEMPLATE_DIR / "article_links_desired_info.txt",
             input_variables=["format_instructions", "html_chunk"],
         )
         initial_chat_prompt = ChatPromptTemplate.from_messages(
@@ -68,6 +76,7 @@ class ArticleLinkAgent:
         ).to_messages()
         return revision_messages
 
+    @cached(LRUCache(maxsize=128))
     def _run_llm_loop(self, html_chunk: str) -> ArticleLinks:
         """The main loop for finding article links.
 
@@ -131,9 +140,20 @@ class ArticleLinkAgent:
                 chunks.extend(self._split_into_chunks(child))
         return chunks
 
-    def create_scraping_traces(self, soup: BeautifulSoup) -> list[list[str]]:
+    def _create_scraping_traces(self, soup: BeautifulSoup) -> list[list[str]]:
         """Generate the traces (i.e. unique paths from the root of the HTML to article
         links) for the given HTML page."""
         article_links = self.find_article_links(soup)
         traces = get_unique_anchor_traces(article_links, soup)
+        return traces, article_links
+
+    async def run(self, url: str) -> tuple[list[str], list[str]]:
+        """Run the agent on the given URL."""
+        response = await get(url)
+        soup = create_soup_for_article_link_retrieval(response.text)
+        traces, article_links = self._create_scraping_traces(soup)
+        self.article_link_trace_registry.set(
+            url.rstrip("/"),
+            {"finalised": False, "traces": traces},
+        )
         return traces, article_links

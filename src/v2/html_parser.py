@@ -3,6 +3,16 @@ from hashlib import sha256
 from bs4 import BeautifulSoup, Tag
 
 
+def get_text_trace(text: str, soup: BeautifulSoup) -> list[str]:
+    """Generic trace to some textual content."""
+    text_el = soup.find(string=text)
+    if text_el is None:
+        raise ValueError(f"Text {text} not found in soup.")
+    text_container = text_el.parent
+    trace = trace_tag_to_root(text_container)
+    return trace[::-1]
+
+
 def get_unique_anchor_traces(
     article_links: list[str], html: BeautifulSoup
 ) -> list[list[str]]:
@@ -11,7 +21,9 @@ def get_unique_anchor_traces(
     existing_path_hashes = []
     for link in article_links:
         anchor = html.find("a", href=link)
-        anchor_trace = _trace_anchor_to_root(anchor)
+        if anchor is None:
+            continue
+        anchor_trace = trace_tag_to_root(anchor)
         hash = sha256(str(anchor_trace).encode("utf-8")).hexdigest()
         if hash not in existing_path_hashes:
             anchor_paths.append(anchor_trace[::-1])
@@ -19,7 +31,7 @@ def get_unique_anchor_traces(
     return anchor_paths
 
 
-def _trace_anchor_to_root(anchor: BeautifulSoup) -> list[tuple[str, dict]]:
+def trace_tag_to_root(anchor: BeautifulSoup) -> list[str]:
     """Traces a tag to the root of the BeautifulSoup.
 
     Args:
@@ -38,6 +50,24 @@ def _trace_anchor_to_root(anchor: BeautifulSoup) -> list[tuple[str, dict]]:
             break
         current_anchor = current_anchor.parent
     return trace
+
+
+def find_text_from_trace(root: Tag, trace: list[str]) -> str:
+    """Finds the tag that matches the trace.
+
+    Args:
+        soup: The HTML to search.
+        trace: The trace to match.
+
+    Returns:
+        The tag that matches the trace.
+    """
+    current_tag = root
+    for tag in trace:
+        if current_tag is None:
+            raise ValueError("The trace was lost.")
+        current_tag = current_tag.find(tag, recursive=False)
+    return current_tag.get_text()
 
 
 def find_anchor_tags_from_traces(root: Tag, traces: list[list[str]]) -> list[Tag]:
