@@ -15,7 +15,6 @@ from v2.client import get
 from v2.client.helpers import get_url_stem
 from v2.html_parser import trace_tag_to_root
 from v2.registry import JsonFileRegistry
-from v2.soup_helpers import create_soup
 from v2.tools.article_info_agent_tools import get_h1_text_content
 
 TEMPLATE_DIR = ROOT_DIR / "src" / "v2" / "templates"
