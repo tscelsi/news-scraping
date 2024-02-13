@@ -1,7 +1,6 @@
 from bson import ObjectId
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CustomBaseModel(BaseModel):
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = ConfigDict(json_encoders={ObjectId: str})

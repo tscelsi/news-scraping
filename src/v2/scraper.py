@@ -1,18 +1,19 @@
 import functools
 import logging
 from datetime import datetime, timezone
-from typing import Any, Awaitable, Optional
+from typing import Any, Optional
 
 import aiometer
 from bs4 import BeautifulSoup, Tag
 from pydantic import BaseModel, ConfigDict, Field
 
+from api.v2.trace.repository import TraceRepository
 from exceptions import BaseException
+from models import PyObjectId
 from v2.client import get
-from v2.client.helpers import get_domain, get_url_stem
+from v2.client.helpers import get_domain
 from v2.html_parser import find_anchor_tags_from_traces, find_text_from_traces
 from v2.models.article import Article
-from v2.registry import JsonFileRegistry
 from v2.soup_helpers import create_soup_for_article_link_retrieval
 
 logger = logging.getLogger(__name__)
@@ -33,21 +34,17 @@ class Scraper(BaseModel):
     model_config: ConfigDict = ConfigDict(
         arbitrary_types_allowed=True,
     )
+    sourceId: PyObjectId
     domain: Optional[str] = Field(
         default=None, description="The domain of the website being scraped"
     )
     articles: list[Article] = []
-    article_link_trace_registry: JsonFileRegistry = JsonFileRegistry(
-        "article_link_traces"
-    )
-    article_title_trace_registry: JsonFileRegistry = JsonFileRegistry(
-        "article_title_traces"
-    )
     max_at_once: int = 10
     max_per_second: int = 10
 
     def _set_domain(self, url: str):
-        self.domain = get_domain(url)
+        if not self.domain:
+            self.domain = get_domain(url)
 
     def _get_from_registry(self, key: str, registry: dict) -> Any:
         entry = registry.get(key)
@@ -64,14 +61,14 @@ class Scraper(BaseModel):
     async def get_article_info(self, url: URL) -> Article | None:
         """Gets the article content and creates an article object. All errors should
         be caught and should return None on error"""
+        self._set_domain(url)
         try:
             response = await get(url)
             soup = BeautifulSoup(response.text, "html.parser")
-            article_title_trace = self.article_title_trace_registry.get(
-                get_url_stem(url),
-                raise_on_not_found=True,
+            trace_obj = TraceRepository.read_by(
+                {"sourceId": self.sourceId, "type": "article_title"}
             )
-            article_title = find_text_from_traces(soup, article_title_trace["traces"])
+            article_title = find_text_from_traces(soup, trace_obj.traces)
             return Article(
                 domain=self.domain,
                 url=url,
@@ -86,18 +83,16 @@ class Scraper(BaseModel):
 
     async def get_article_links(self, url: str) -> list[Tag]:
         """List articles from the page found at <url>."""
+        self._set_domain(url)
         response = await get(url)
         body_soup = create_soup_for_article_link_retrieval(response.text)
-        article_link_traces = self.article_link_trace_registry.get(
-            url.strip("/"),
-            raise_on_not_found=True,
+        trace_obj = TraceRepository.read_by(
+            {"sourceId": self.sourceId, "type": "article_links"}
         )
-        article_links = find_anchor_tags_from_traces(
-            body_soup, article_link_traces["traces"]
-        )
+        article_links = find_anchor_tags_from_traces(body_soup, trace_obj.traces)
         return [self._maybe_add_prefix_to_href(x.attrs["href"]) for x in article_links]
 
-    async def run(self, url: str) -> Awaitable[list[Article]]:
+    async def run(self, url: str) -> list[Article]:
         """Full run of scrape, from article link acquisition to article information
         retrieval.
 

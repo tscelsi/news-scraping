@@ -7,3 +7,7 @@ class RepositoryException(Exception):
 
 class RepositoryInvalidIdError(RepositoryException):
     pass
+
+
+class ObjectNotFoundError(RepositoryException):
+    pass

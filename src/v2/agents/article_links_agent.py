@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from asyncache import cached
 from bs4 import BeautifulSoup, Tag
 from cachetools import LRUCache
@@ -12,13 +10,14 @@ from langchain.prompts import (
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
 
+from consts import SRC_DIR
 from v2.client import get
 from v2.html_parser import get_unique_anchor_traces
 from v2.registry import JsonFileRegistry
 from v2.soup_helpers import create_soup_for_article_link_retrieval
 
 MAX_REVISIONS = 3
-TEMPLATE_DIR = Path(__file__).parent / "templates"
+TEMPLATE_DIR = SRC_DIR / "v2" / "templates"
 
 
 class ArticleLinks(BaseModel):
@@ -140,22 +139,18 @@ class ArticleLinksAgent:
                 chunks.extend(self._split_into_chunks(child))
         return chunks
 
-    def _create_scraping_traces(self, soup: BeautifulSoup) -> list[list[str]]:
+    def _create_scraping_traces(
+        self, soup: BeautifulSoup
+    ) -> tuple[list[list[str]], list[str]]:
         """Generate the traces (i.e. unique paths from the root of the HTML to article
         links) for the given HTML page."""
         article_links = self.find_article_links(soup)
         traces = get_unique_anchor_traces(article_links, soup)
         return traces, article_links
 
-    async def run(self, url: str) -> tuple[list[str], list[str]]:
+    async def run(self, url: str) -> tuple[list[list[str]], list[str]]:
         """Run the agent on the given URL."""
         response = await get(url)
         soup = create_soup_for_article_link_retrieval(response.text)
         traces, article_links = self._create_scraping_traces(soup)
-        # TODO: should be an update in db so we don't remove any traces, but add
-        # to the list of traces - if they are finalised. If not, we can override?
-        self.article_link_trace_registry.set(
-            url.rstrip("/"),
-            {"finalised": False, "traces": traces},
-        )
         return traces, article_links

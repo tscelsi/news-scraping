@@ -1,13 +1,16 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
+
+from models import CustomBaseModel, PyObjectId
+from v2.models.mixins import AuditMixin
 
 
-class Article(BaseModel):
+class Article(CustomBaseModel, AuditMixin):
     domain: str = Field(description="The domain the article was extracted from")
     url: str = Field(description="The URL of the article")
-    published: Optional[str] | Optional[datetime] = Field(
+    published_at: Optional[str] | Optional[datetime] = Field(
         default=None, description="The date the article was published"
     )
     title: str = Field(description="The title of the article")
@@ -21,11 +24,14 @@ class Article(BaseModel):
     author: Optional[list[str]] = Field(
         default=None, description="The author(s) of the article"
     )
-    scrape_time: datetime = Field(description="The time the article was last scraped")
+    scraped_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="The time the article was last scraped",
+    )
 
 
 class DBArticle(Article):
-    id: str = Field(
+    id: PyObjectId = Field(
         description="Unique identifier of this strategy in the database", alias="_id"
     )
 

@@ -1,16 +1,18 @@
-from bson import ObjectId
+from bson import ObjectId as _ObjectId
+from pydantic.functional_validators import AfterValidator, BeforeValidator
+from typing_extensions import Annotated
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
 
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
+def convert_to_object_id(value: str | _ObjectId) -> str:
+    if not _ObjectId.is_valid(value):
+        raise ValueError("Invalid ObjectId")
+    return _ObjectId(value)
 
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+
+def convert_from_object_id(value: _ObjectId) -> str:
+    return str(value)
+
+
+PyObjectId = Annotated[
+    str, BeforeValidator(convert_from_object_id), AfterValidator(convert_to_object_id)
+]

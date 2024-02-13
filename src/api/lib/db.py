@@ -1,10 +1,12 @@
-import sys
 import os
-from pydantic import BaseSettings, BaseModel
+import sys
+
 import pymongo
 import pymongo.errors as errors
-from pymongo.collection import Collection
 from bson import ObjectId
+from pydantic import BaseModel
+from pymongo.collection import Collection
+
 from models import Feed
 
 
@@ -19,23 +21,29 @@ def is_valid_id(id: str):
 class MockDeleteResult:
     deleted_count = 1
 
+
 class MockCollection:
     def __init__(self, model: BaseModel):
         self._model = model
+
     def find(self, *args, **kwargs):
-        model = self._model(name='test', outlets=[])
-        return [{**model.dict(), '_id': ObjectId()}]
+        model = self._model(name="test", outlets=[])
+        return [{**model.dict(), "_id": ObjectId()}]
+
     def find_one(self, *args, **kwargs):
-        model = self._model(name='test', outlets=[])
+        model = self._model(name="test", outlets=[])
         _id = args[0].get("_id")
-        return {**model.dict(), '_id': _id or ObjectId()}
+        return {**model.dict(), "_id": _id or ObjectId()}
+
     def find_one_and_update(self, *args, **kwargs):
-        model = self._model(name='test', outlets=[])
+        model = self._model(name="test", outlets=[])
         _id = args[0].get("_id")
-        return {**model.dict(), '_id': _id or ObjectId()}
+        return {**model.dict(), "_id": _id or ObjectId()}
+
     def insert_one(self, *args, **kwargs):
         _obj = args[0]
-        return {**Feed(**_obj).dict(), '_id': ObjectId()}
+        return {**Feed(**_obj).dict(), "_id": ObjectId()}
+
     def delete_one(self, *args, **kwargs):
         return MockDeleteResult()
 
@@ -43,6 +51,7 @@ class MockCollection:
 class MockDatabase:
     def __init__(self):
         self.strategies = MockCollection(Feed)
+
 
 class MockClient:
     def __init__(self, uri: str):
@@ -58,11 +67,12 @@ MONGO_URI = os.getenv("MONGO_URI")
 ENV = os.getenv("ENV")
 try:
     if not MONGO_URI:
-        raise ValueError('Make sure to set the MONGO_URI environment variable.')
+        raise ValueError("Make sure to set the MONGO_URI environment variable.")
     client = pymongo.MongoClient(MONGO_URI)
 except errors.ConnectionFailure as e:
     print(e)
     sys.exit(1)
+
 
 class Db:
     @property
@@ -72,7 +82,7 @@ class Db:
     @property
     def strategies(self) -> Collection:
         return client.news.strategies
-    
+
     @property
     def feed(self) -> Collection:
         return client.news.Feed
@@ -82,13 +92,25 @@ class Db:
         return client.news.FeedOutlet
 
     @property
+    def feedsource(self) -> Collection:
+        return client.news.FeedSource
+
+    @property
     def scrapingjob(self) -> Collection:
         return client.news.ScrapingJob
-    
+
     @property
     def user(self) -> Collection:
         return client.news.User
-    
+
     @property
     def source(self) -> Collection:
-        return client.news.Outlet
+        return client.news.Source
+
+    @property
+    def v2article(self) -> Collection:
+        return client.news.V2Article
+
+    @property
+    def trace(self) -> Collection:
+        return client.news.Trace
