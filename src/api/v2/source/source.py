@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from api.lib.db import Db
 from models import CustomBaseModel
-from v2.agents.manager import AgentManager
+from v2.tracer import create_url_traces
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/source", tags=["source"])
@@ -31,9 +31,8 @@ class CheckRequestBody(CustomBaseModel):
     response_model=CheckResponse,
 )
 async def check_source(body: CheckRequestBody) -> CheckResponse:
-    agent_manager = AgentManager()
     try:
-        article_info_models = await agent_manager.create_url_traces(body.name, body.url)
+        article_info_models = await create_url_traces(body.name, body.url)
     except Exception as e:
         logger.exception(e)
         return CheckResponse(success=False, titles=[])

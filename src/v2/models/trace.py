@@ -1,6 +1,7 @@
 from pydantic import Field
 
 from models import CustomBaseModel, PyObjectId
+from v2.models.helpers import partial_model
 from v2.models.mixins import AuditMixin
 
 
@@ -13,6 +14,11 @@ class Trace(CustomBaseModel, AuditMixin):
     type: str = Field(
         description="The type of trace, e.g. article_links, article_info, etc.",
     )
+
+
+@partial_model
+class UpdateTrace(Trace):
+    pass
 
 
 class DBTrace(Trace):

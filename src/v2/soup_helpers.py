@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup, Tag
 
 UNINTERESTING_TAGS = [
@@ -33,6 +35,17 @@ INTERESTING_TAGS = [
 ]
 
 AnchorTag = Tag
+
+
+def find_all_anchor_tags(soup: BeautifulSoup) -> str:
+    anchors = soup.find_all("a")
+    text_parts = []
+    for anchor in anchors:
+        anchor_text = anchor.text.replace("\n", " ")
+        anchor_text = re.sub(" +", " ", anchor_text)
+        anchor_text = anchor_text.strip()
+        text_parts.append(f"{anchor_text} ({anchor.get('href')})")
+    return " ".join(text_parts)
 
 
 def remove_uninteresting_paths(tag: Tag):

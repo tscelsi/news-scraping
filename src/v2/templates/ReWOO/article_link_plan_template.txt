@@ -1,0 +1,4 @@
+Plan: List all the anchor tags in the HTML to find the links to news articles.
+#E1 = ListAnchors[{html_chunk}]
+Plan: Get extra information about each anchor tag in order to be better informed about which anchor tag may lead to an article.
+#E2 = ExtractAnchorInformation[#E1]

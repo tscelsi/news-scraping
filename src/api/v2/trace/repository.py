@@ -10,7 +10,7 @@ from api.lib.exceptions import (
     RepositoryException,
     RepositoryInvalidIdError,
 )
-from v2.models.trace import DBTrace, Trace
+from v2.models.trace import DBTrace, Trace, UpdateTrace
 
 _db = Db()
 
@@ -46,7 +46,7 @@ class TraceRepository:
         if not is_valid_id(id):
             raise RepositoryInvalidIdError("Invalid id")
         try:
-            validated_dict = Trace(**update_obj).model_dump()
+            validated_dict = UpdateTrace(**update_obj).model_dump(exclude_unset=True)
         except ValidationError as e:
             raise RepositoryException(e.json())
         result = _db.trace.find_one_and_update(

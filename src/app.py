@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 
@@ -11,7 +11,10 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 from api.lib.dependencies import on_auth
 
 # from api.source import router as source_router
-from api.v2 import router as v2_router
+from api.v2.source import router as source_router
+
+v2_router = APIRouter(prefix="/v2", tags=["v2"])
+v2_router.include_router(source_router)
 
 
 @asynccontextmanager

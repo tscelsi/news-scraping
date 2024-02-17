@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, Tag
-from soup_helpers import keep_only_interesting_paths
+
+from v2.soup_helpers import keep_only_interesting_paths
 
 AnchorTag = Tag
 

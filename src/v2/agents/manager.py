@@ -5,13 +5,9 @@ from bson.errors import InvalidId
 
 from api.lib.db import Db
 from api.lib.exceptions import ObjectNotFoundError
-from api.v2.source.repository import SourceRepository
 from api.v2.trace.repository import TraceRepository
 from models import PyObjectId
-from v2.models.article import Article
-from v2.models.source import Source
 from v2.models.trace import Trace
-from v2.scraper import Scraper
 
 from .article_info_agent import ArticleInfoAgent
 from .article_links_agent import ArticleLinksAgent
@@ -91,17 +87,3 @@ class AgentManager:
             )
         )
         return traces
-
-    async def create_url_traces(self, name: str, url: str) -> list[Article]:
-        """Checks that the URL is scrapeable"""
-        # finds article links and sets traces if applicable
-        url = url.rstrip("/")
-        # get or create source
-        source = SourceRepository.read_or_create(Source(name=name, url=url))
-        scraper = Scraper(sourceId=source.id)
-        await self.maybe_create_article_link_traces(url, source.id)
-        article_links = await scraper.get_article_links(url)
-        # finds article info and sets traces if applicable
-        await self.maybe_create_article_info_traces(article_links[0], source.id)
-        article_info_models = await scraper.run(url)
-        return article_info_models

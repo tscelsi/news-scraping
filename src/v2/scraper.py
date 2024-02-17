@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup, Tag
 from pydantic import BaseModel, ConfigDict, Field
 
 from api.v2.trace.repository import TraceRepository
+from consts import HEADERS
 from exceptions import BaseException
 from models import PyObjectId
 from v2.client import get
@@ -63,7 +64,7 @@ class Scraper(BaseModel):
         be caught and should return None on error"""
         self._set_domain(url)
         try:
-            response = await get(url)
+            response = await get(url, headers=HEADERS, follow_redirects=True)
             soup = BeautifulSoup(response.text, "html.parser")
             trace_obj = TraceRepository.read_by(
                 {"sourceId": self.sourceId, "type": "article_title"}
@@ -84,7 +85,7 @@ class Scraper(BaseModel):
     async def get_article_links(self, url: str) -> list[Tag]:
         """List articles from the page found at <url>."""
         self._set_domain(url)
-        response = await get(url)
+        response = await get(url, headers=HEADERS, follow_redirects=True)
         body_soup = create_soup_for_article_link_retrieval(response.text)
         trace_obj = TraceRepository.read_by(
             {"sourceId": self.sourceId, "type": "article_links"}

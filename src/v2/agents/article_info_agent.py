@@ -10,9 +10,8 @@ from langchain.prompts import (
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
-from consts import ROOT_DIR
+from consts import HEADERS, ROOT_DIR
 from v2.client import get
-from v2.client.helpers import get_url_stem
 from v2.html_parser import trace_tag_to_root
 from v2.registry import JsonFileRegistry
 from v2.tools.article_info_agent_tools import get_h1_text_content
@@ -140,7 +139,7 @@ class ArticleInfoAgent:
         raise ValueError("No title found")
 
     async def run(self, url: str) -> list[str]:
-        response = await get(url)
+        response = await get(url, headers=HEADERS, follow_redirects=True)
         soup = BeautifulSoup(response.text, "html.parser")
         title_trace = await self.create_title_trace(soup)
         return title_trace

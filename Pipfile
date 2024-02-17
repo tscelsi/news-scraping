@@ -21,6 +21,8 @@ scikit-learn = "*"
 fastapi-cache2 = {extras = ["memcache"], version = "*"}
 langchain = "*"
 langchain-openai = "*"
+langgraph = "*"
+levenshtein = "*"
 
 [dev-packages]
 ipykernel = "*"

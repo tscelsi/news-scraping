@@ -62,12 +62,10 @@ def find_text_from_trace(root: Tag, trace: list[str]) -> str:
     Returns:
         The tag that matches the trace.
     """
-    current_tag = root
-    for tag in trace:
-        if current_tag is None:
-            raise ValueError("The trace was lost.")
-        current_tag = current_tag.find(tag, recursive=False)
-    return current_tag.get_text()
+    matched_tags = _find_tag_from_trace(root, trace, trace[-1])
+    if len(matched_tags) == 0:
+        raise ValueError("No tag found with the given trace.")
+    return matched_tags[0].get_text()
 
 
 def find_text_from_traces(root: Tag, traces: list[list[str]]):
@@ -113,5 +111,19 @@ def _find_anchor_tags_from_trace(root_tag: Tag, trace: list[str]):
     candidates = root_tag.find_all(current_tag, recursive=False)
     for c in candidates:
         result = _find_anchor_tags_from_trace(c, trace)
+        tags.extend(result)
+    return tags
+
+
+def _find_tag_from_trace(root_tag: Tag, trace: list[str], tag: str):
+    if trace[-1] != tag:
+        raise ValueError(f"The trace must end with the {tag} tag.")
+    if len(trace) == 1:
+        return root_tag.find_all(tag, recursive=False)
+    tags = []
+    current_tag, *trace = trace
+    candidates = root_tag.find_all(current_tag, recursive=False)
+    for c in candidates:
+        result = _find_tag_from_trace(c, trace, tag)
         tags.extend(result)
     return tags
