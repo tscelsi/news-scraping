@@ -15,7 +15,7 @@ from v2.client import get
 from v2.client.helpers import get_domain
 from v2.html_parser import find_anchor_tags_from_traces, find_text_from_traces
 from v2.models.article import Article
-from v2.soup_helpers import create_soup_for_article_link_retrieval
+from v2.soup_helpers import create_soup
 
 logger = logging.getLogger(__name__)
 URL = str
@@ -57,6 +57,7 @@ class Scraper(BaseModel):
         if href.startswith("http"):
             return href
         # assume https
+        href = href.lstrip("/")
         return f"https://{self.domain}/{href}"
 
     async def get_article_info(self, url: URL) -> Article | None:
@@ -82,16 +83,20 @@ class Scraper(BaseModel):
             # swallow exception so we don't exit the scrape run
             return None
 
-    async def get_article_links(self, url: str) -> list[Tag]:
+    async def get_article_links(self, url: str) -> list[str]:
         """List articles from the page found at <url>."""
         self._set_domain(url)
         response = await get(url, headers=HEADERS, follow_redirects=True)
-        body_soup = create_soup_for_article_link_retrieval(response.text)
+        body_soup = create_soup(response.text)
         trace_obj = TraceRepository.read_by(
             {"sourceId": self.sourceId, "type": "article_links"}
         )
         article_links = find_anchor_tags_from_traces(body_soup, trace_obj.traces)
-        return [self._maybe_add_prefix_to_href(x.attrs["href"]) for x in article_links]
+        return list(
+            set(
+                [self._maybe_add_prefix_to_href(x.attrs["href"]) for x in article_links]
+            )
+        )
 
     async def run(self, url: str) -> list[Article]:
         """Full run of scrape, from article link acquisition to article information

@@ -28,21 +28,21 @@ class AgentManager:
         try:
             source_id = ObjectId(source_id)
             trace_obj = TraceRepository.read_by(
-                {"sourceId": ObjectId(source_id), "type": "article_links"}
+                {"sourceId": source_id, "type": "article_links"}
             )
         except ObjectNotFoundError:
             pass
         except InvalidId:
             pass
         if trace_obj and trace_obj.is_finalised:
-            return trace_obj.traces
-        traces, _ = await self.article_links_agent.run(url)
+            return trace_obj.traces, [], True
+        traces, article_links = await self.article_links_agent.run(url)
         if trace_obj:
             # not finalised, so we want to update
             TraceRepository.update(
                 trace_obj.id, {"traces": traces, "is_finalised": False}
             )
-            return traces
+            return traces, article_links, False
         # create new
         TraceRepository.create(
             Trace(
@@ -52,9 +52,9 @@ class AgentManager:
                 type="article_links",
             )
         )
-        return traces
+        return traces, article_links, False
 
-    async def maybe_create_article_info_traces(
+    async def get_or_create_or_update_article_title_traces(
         self, url: str, source_id: PyObjectId | str
     ) -> list[list[str]]:
         trace_obj = None
@@ -70,20 +70,22 @@ class AgentManager:
         if trace_obj and trace_obj.is_finalised:
             return trace_obj.traces
         trace = await self.article_info_agent.run(url)
-        traces = [trace]
         if trace_obj:
-            # not finalised, so we want to update
+            # not finalised, so we want to update if it's not already there
+            if trace not in trace_obj.traces:
+                trace_obj.traces.append(trace)
             TraceRepository.update(
-                trace_obj.id, {"traces": traces, "is_finalised": False}
+                trace_obj.id,
+                {"traces": trace_obj.traces, "is_finalised": False},
             )
-            return traces
+            return [trace]
         # create new
         TraceRepository.create(
             Trace(
-                traces=traces,
+                traces=[trace],
                 is_finalised=False,
                 sourceId=source_id,
                 type="article_title",
             )
         )
-        return traces
+        return [trace]

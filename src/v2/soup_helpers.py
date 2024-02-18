@@ -44,7 +44,10 @@ def find_all_anchor_tags(soup: BeautifulSoup) -> str:
         anchor_text = anchor.text.replace("\n", " ")
         anchor_text = re.sub(" +", " ", anchor_text)
         anchor_text = anchor_text.strip()
-        text_parts.append(f"{anchor_text} ({anchor.get('href')})")
+        href = anchor.get("href")
+        if not href or not anchor_text:
+            continue
+        text_parts.append(f"{anchor_text} ({href})")
     return " ".join(text_parts)
 
 
@@ -99,6 +102,4 @@ def create_soup_for_article_link_retrieval(html_page: str) -> BeautifulSoup:
 def create_soup(html_page: str) -> BeautifulSoup:
     soup = BeautifulSoup(html_page, "html.parser")
     remove_uninteresting_paths(soup)
-    body = soup.find("body")
-    body_soup = BeautifulSoup(str(body), "html.parser")
-    return body_soup
+    return soup

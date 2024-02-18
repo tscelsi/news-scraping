@@ -28,6 +28,7 @@ def log_and_raise_if_non_200(func: Callable[[Any], Awaitable[httpx.Response]]):
     async def wrapper(*args, **kwargs):
         response = await func(*args, **kwargs)
         # log request/response information
+        response.request.read()
         logger.debug(
             f"{response.request.method} {response.request.url} returned {response.status_code}. {response.elapsed} elapsed. |\n"  # noqa
             + f"REQ HEADERS: {response.request.headers} |\n"

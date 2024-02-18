@@ -5,6 +5,7 @@ from langchain.tools import tool
 
 from v2.heuristic import a_inside_tag, check_upward_keyword_in_tag
 from v2.soup_helpers import create_soup, find_all_anchor_tags
+from v2.text_helpers import asciify
 
 article_and_href_pattern = re.compile(r"(\S.*?) \((.*?)\)")
 
@@ -39,6 +40,8 @@ def extract_anchor_information(html_str: str, anchors_str: str) -> list[tuple]:
     for anchor_text, anchor_href in anchors:
         a_tag = soup.find("a", text=anchor_text, href=anchor_href)
         if not a_tag:
+            a_tag = soup.find("a", href=anchor_href)
+        if not a_tag:
             continue
         # use these heuristics as extra metadata to help inform LLM model and assist
         # with isolating only article links
@@ -48,8 +51,8 @@ def extract_anchor_information(html_str: str, anchors_str: str) -> list[tuple]:
         ends_with_dot_html = anchor_href.endswith(".html")
         anchor_list.append(
             (
-                anchor_text,
-                anchor_href,
+                asciify(anchor_text),
+                asciify(anchor_href),
                 has_title_in_attrs,
                 is_inside_article_tag,
                 is_inside_li_tag,

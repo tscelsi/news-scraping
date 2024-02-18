@@ -17,7 +17,7 @@ from v2.agents.tools.article_links_tools import (
 )
 
 TEMPLATE_DIR = SRC_DIR / "v2" / "templates"
-regex_pattern = r"Plan:\s*(.+)\s*(#E\d+)\s*=\s*(\w+)\s*\[([^\]]+)\]"
+regex_pattern = r"(?:\s*Plan:\s*(.+?)\s*(#E\d+)\s*=\s*(\w+)\s*\[(.+)\](?=\s*Plan:))*\s*Plan:\s*(.+?)\s*(#E\d+)\s*=\s*(\w+)\s*\[(.+)\]$"
 model = ChatOpenAI(model_name="gpt-3.5-turbo-0125", temperature=0)
 
 
@@ -33,6 +33,7 @@ class ArticleLinkReWOO(TypedDict):
     steps: List
     results: dict
     result: ArticleLinks
+    candidate_links: list[tuple[str, str]]
     html_str: str
 
 
@@ -52,12 +53,8 @@ def _get_planner() -> RunnableSerializable[Dict, Any]:
     return planner
 
 
-def get_plan(html_str: str, state: ArticleLinkReWOO):
-    prompt_template = get_article_link_plan_template()
-    prompt = prompt_template.format(html_chunk=html_str)
-    # Find all matches in the sample text
-    matches = re.findall(regex_pattern, prompt)
-    return {"steps": matches, "plan_string": prompt, "html_str": html_str}
+def init(html_str: str, state: ArticleLinkReWOO):
+    return {"html_str": html_str}
 
 
 def _get_current_task(state: ArticleLinkReWOO):
@@ -69,7 +66,7 @@ def _get_current_task(state: ArticleLinkReWOO):
         return len(state["results"]) + 1
 
 
-def tool_execution(state: ArticleLinkReWOO):
+def tool_execution(state: ArticleLinkReWOO):  # -> dict[str, dict]:
     """Worker node that executes the tools of a given plan."""
     _step = _get_current_task(state)
     _, step_name, tool, tool_input = state["steps"][_step - 1]
@@ -88,22 +85,22 @@ def tool_execution(state: ArticleLinkReWOO):
     return {"results": _results}
 
 
+"""3. Whether the anchor is nested inside an <article> tag - NOT AS IMPORTANT
+4. Whether the anchor is nested inside an <li> tag - NOT AS IMPORTANT
+5. Whether the href ends with .html - IMPORTANT"""
+
 solve_prompt = """Make an informed decision about which of the following links are links to blog-like article web pages.
-To decide this, you need to consider the text contained in the link, the URL of the link, and the context in which the link is found.
-The information for each link is provided as a tuple, where each tuple item corresponds to the following:
-1. The anchor text of the link.
-2. The href of the link.
-3. Whether the anchor is nested inside an <article> tag.
-4. Whether the anchor is nested inside an <li> tag.
-5. Whether the href ends with .html.
+To decide this, you need to consider all the information provided to you for each link.
+The information for each link is provided as a tuple, where each tuple item corresponds respectively to:
+1. The anchor text of the link
+2. The href of the link
 
 Use your judgement to decide which of the links are likely to be blog-like article web pages.
 Bear in mind there may be no links to news articles at all.
 Be careful to not include links that don't point to news articles in your response.
 Do not modify the link text in any way for example by removing or adding words.
 
-Now solve the question or task according to provided Evidence above. Respond with the answer
-directly with no extra words.
+Now solve the question or task according to provided Evidence above.
 
 Links: {link_tuples}
 {format_instructions}
@@ -143,9 +140,14 @@ def get_corresponding_link(link_tuples: list[tuple[str, str]], candidate_link: s
 def solve2(state: ArticleLinkReWOO):
     """Provide the solver with the original html, and the result of the final tool."""
     parser = PydanticOutputParser(pydantic_object=ArticleLinks)
-    article_link_tuples = eval(state["results"]["#E2"])
+    # 1. get anchor tags
+    anchors_str = list_anchor_tag_info.run(state["html_str"])
+    # 2. extract anchor information
+    article_link_tuples = extract_anchor_information.run(
+        {"html_str": state["html_str"], "anchors_str": anchors_str}
+    )
     prompt = solve_prompt.format(
-        link_tuples=article_link_tuples,
+        link_tuples=[(x[0], x[1]) for x in article_link_tuples],
         format_instructions=parser.get_format_instructions(),
     )
     result = model.invoke(prompt)
@@ -157,7 +159,10 @@ def solve2(state: ArticleLinkReWOO):
         corresponding_link = get_corresponding_link(article_link_tuples, link)
         if corresponding_link:
             confirmed_links.append(corresponding_link)
-    return {"result": ArticleLinks(links=confirmed_links)}
+    return {
+        "result": ArticleLinks(links=confirmed_links),
+        "candidate_links": article_link_tuples,
+    }
 
 
 def _route(state):
@@ -173,20 +178,18 @@ def _route(state):
 if __name__ == "__main__":
     import httpx
 
-    response = httpx.get(
-        "https://www.nytimes.com/international/section/business/energy-environment"
-    )
+    response = httpx.get("https://www.aljazeera.com/us-canada/")
     from v2.soup_helpers import create_soup
 
     soup = create_soup(response.text)
     graph = StateGraph(ArticleLinkReWOO)
-    graph.add_node("plan", functools.partial(get_plan, str(soup)))
-    graph.add_node("tool", tool_execution)
+    graph.add_node("init", functools.partial(init, str(soup)))
     graph.add_node("solve", solve2)
-    graph.add_edge("plan", "tool")
+    graph.add_edge("init", "solve")
     graph.add_edge("solve", END)
-    graph.add_conditional_edges("tool", _route)
-    graph.set_entry_point("plan")
+    graph.set_entry_point("init")
+    # graph.add_node("tool", tool_execution)
+    # graph.add_conditional_edges("tool", _route)
 
     app = graph.compile()
     state = app.invoke({})

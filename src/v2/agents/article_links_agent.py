@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 
 from consts import HEADERS
-from v2.agents.rewoo import ArticleLinkReWOO, _route, get_plan, solve2, tool_execution
+from v2.agents.rewoo import ArticleLinkReWOO, init, solve2
 from v2.client import get
 from v2.html_parser import get_unique_anchor_traces
 from v2.soup_helpers import create_soup
@@ -34,27 +34,26 @@ class ArticleLinksAgent:
             ArticleLinks: A list of the links the ReWOO agent believes point to articles in the HTML.
         """
         graph = StateGraph(ArticleLinkReWOO)
-        graph.add_node("plan", functools.partial(get_plan, str(soup)))
-        graph.add_node("tool", tool_execution)
+        graph.add_node("init", functools.partial(init, str(soup)))
         graph.add_node("solve", solve2)
-        graph.add_edge("plan", "tool")
+        graph.add_edge("init", "solve")
         graph.add_edge("solve", END)
-        graph.add_conditional_edges("tool", _route)
-        graph.set_entry_point("plan")
+        graph.set_entry_point("init")
         app = graph.compile()
         state = app.invoke({})
+        self.candidate_links = state["candidate_links"]
         return state["result"]
 
     def _create_scraping_traces(
         self, soup: BeautifulSoup
-    ) -> tuple[list[list[str]], list[str]]:
+    ) -> tuple[list[list[str]], ArticleLinks]:
         """Generate the traces (i.e. unique paths from the root of the HTML to article
         links) for the given HTML page."""
         article_links = self.find_article_links(soup)
         traces = get_unique_anchor_traces(article_links.links, soup)
         return traces, article_links
 
-    async def run(self, url: str) -> tuple[list[list[str]], list[str]]:
+    async def run(self, url: str) -> tuple[list[list[str]], ArticleLinks]:
         """Run the agent on the given URL."""
         response = await get(url, headers=HEADERS, follow_redirects=True)
         soup = create_soup(response.text)

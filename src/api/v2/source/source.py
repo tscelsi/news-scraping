@@ -15,6 +15,11 @@ def create_url(source: str, endpoint: str):
     return "/".join([source, endpoint.strip("/")])
 
 
+class CandidateLink(CustomBaseModel):
+    url: str
+    text: str
+
+
 class CheckResponse(CustomBaseModel):
     success: bool
     titles: list[str]
@@ -32,8 +37,13 @@ class CheckRequestBody(CustomBaseModel):
 )
 async def check_source(body: CheckRequestBody) -> CheckResponse:
     try:
-        article_info_models = await create_url_traces(body.name, body.url)
+        article_info_models = await create_url_traces(
+            body.name, body.url
+        )
     except Exception as e:
         logger.exception(e)
         return CheckResponse(success=False, titles=[])
-    return CheckResponse(success=True, titles=[x.title for x in article_info_models])
+    return CheckResponse(
+        success=True,
+        titles=[x.title for x in article_info_models],
+    )

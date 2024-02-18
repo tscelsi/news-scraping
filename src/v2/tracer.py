@@ -16,6 +16,9 @@ async def create_url_traces(name: str, url: str) -> list[Article]:
     await agent_manager.maybe_create_article_link_traces(url, source.id)
     article_links = await scraper.get_article_links(url)
     # finds article info and sets traces if applicable
-    await agent_manager.maybe_create_article_info_traces(article_links[0], source.id)
+    for link in article_links:
+        await agent_manager.get_or_create_or_update_article_title_traces(
+            link, source.id
+        )
     article_info_models = await scraper.run(url)
     return article_info_models
